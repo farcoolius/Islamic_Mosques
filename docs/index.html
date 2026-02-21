@@ -146,13 +146,18 @@
         map.on('mouseenter', 'placesLayer', function (e) {
             map.getCanvas().style.cursor = 'pointer';
 
-            var coordinates = e.features[0].geometry.coordinates;
-            var content = e.features[0].properties.content;
-            var contributor = e.features[0].properties.contributor;
+            var mosqueName = e.features[0].properties.mosque_name || "Unknown";
+            var yearEstablished = e.features[0].properties.year_established || "N/A";
+            var content = e.features[0].properties.content || "";
+            var contributor = e.features[0].properties.contributor || "Anonymous";
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
-                .setHTML("<p><b>" + contributor + "</b> <i>said:</i> " + content + "</p>")
+                .setHTML(`
+                    <p><b>${mosqueName}</b> (${yearEstablished})</p>
+                    <p>${content}</p>
+                    <p><i>Added by:</i> ${contributor}</p>
+                `)
                 .addTo(map);
         });
 
@@ -169,7 +174,15 @@
             }
 
             // Create the HTML content for the contribution popup
-            const popupContent = '<div id="popup"><input type="text" id="name" placeholder="Input your name here..."><input type="text" id="content" placeholder="Input your message here..."><button id="submit">submit</button></div>';
+            const popupContent = `
+                <div id="popup">
+                    <input type="text" id="name" placeholder="Your name (optional)">
+                    <input type="text" id="mosque_name" placeholder="Mosque name (required)">
+                    <input type="number" id="year_established" placeholder="Year established (e.g., 1998)">
+                    <input type="text" id="content" placeholder="Notes / history (optional)">
+                    <button id="submit">Submit</button>
+                </div>
+            `;
 
             // Create a new popup and set its content
             popup = new maplibregl.Popup({ closeOnClick: false })
@@ -185,12 +198,16 @@
         // Function to handle the submission of a new record
         async function submitNewRecord() {
             let contributor = document.getElementById('name').value;
+            let mosqueName = document.getElementById('mosque_name').value;
+            let yearEstablished = document.getElementById('year_established').value;
             let content = document.getElementById('content').value;
             let lngLat = popup.getLngLat();
 
             // Create a new URLSearchParams object and append the data to it
             let newRecord = new URLSearchParams();
             newRecord.append('contributor', contributor);
+            newRecord.append('mosque_name', mosqueName);
+            newRecord.append('year_established', yearEstablished);
             newRecord.append('content', content);
             newRecord.append('lng', lngLat.lng);
             newRecord.append('lat', lngLat.lat);
