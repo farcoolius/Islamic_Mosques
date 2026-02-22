@@ -114,11 +114,17 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': data.rows[i].contributor,
+                        'mosque_name': data.rows[i].mosque_name,
+                        'year_established': data.rows[i].year_established,
                         'content': data.rows[i].content,
                     },
                     'geometry': {
                         'type': 'Point',
                         'coordinates': [data.rows[i].lng, data.rows[i].lat]
+                    }
+                    // If the map source already exists, refresh it so points appear immediately
+                    if (map.getSource('places')) {
+                        map.getSource('places').setData(geojson);
                     }
                 });
             }
@@ -229,9 +235,11 @@
                 popup.remove();
                 geojson.features.push({
                     'type': 'Feature',
-                    'properties': {
-                        'contributor': contributor,
-                        'content': content,
+                    properties: {
+                        contributor: contributor,
+                        mosque_name: mosqueName,
+                        year_established: yearEstablished,
+                        content: content
                     },
                     'geometry': {
                         'type': 'Point',
