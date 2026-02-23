@@ -83,7 +83,7 @@
     // Load existing records
     window.addEventListener("load", async function () {
       try {
-        let response = await fetch('https://islamic-mosques.herokuapp.com/api/get-record', { method: 'GET' });
+        let response = await fetch('https://islamic-mosques-28dcf021662a.herokuapp.com/', { method: 'GET' });
         let data = await response.json();
 
         for (let i = 0; i < data.rows.length; i++) {
@@ -201,7 +201,7 @@
       let settings = { method: 'POST', body: newRecord };
 
       try {
-        await fetch('https://islamic-mosques.herokuapp.com/api/add-record', settings);
+        await fetch('https://islamic-mosques-28dcf021662a.herokuapp.com/', settings);
       } catch (err) {
         console.error("Error submitting record:", err);
       } finally {
