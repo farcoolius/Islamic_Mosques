@@ -8,7 +8,7 @@ This participatory web map visualizes mosque locations across Seattle, Washingto
 As someone who identifies as Muslim, this project is personally meaningful to me. Mosques represent more than a religous setting; they are symbols of peace, community, and cultural identity. This map invites users to explore mosque communities across Seattle and contribute locations they also know about.
 
 ## Live Map:
-View the interactive map here: **[Open Map](https://yourusername.github.io/repository-name/)**
+View the interactive map here: **[Open Map](https://farcoolius.github.io/Islamic_Mosques/)**
 
 ## Features
 * Interactive Web Map centered in Seattle
