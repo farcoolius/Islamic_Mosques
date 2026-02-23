@@ -1,256 +1,234 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Islamic Mosques Timeline in Seattle</title>
-    <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
-    <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
-    <!-- Styles for the map and popup -->
-    <style>
-        /* Basic CSS for the page */
-        body {
-            margin: 0;
-            padding: 0;
-        }
+  <title>Islamic Mosques Timeline in Seattle</title>
+  <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
 
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
-        
-        #info {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 350px;
-            margin: 10px;
-            padding: 10px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #000000;
-            z-index: 1;
-        }
-        
-        #popup {
-            padding: 10px;
-        }
+  <style>
+    body { margin: 0; padding: 0; }
 
-        #name {
-            width: 100%;
-            height: 20px;
-            margin-bottom: 10px;
-        }
+    #map {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 100%;
+    }
 
-        #content {
-            width: 100%;
-            height: 45px;
-            margin-bottom: 10px;
-        }
+    #info {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 350px;
+      margin: 10px;
+      padding: 10px;
+      background-color: #ffffff;
+      border-radius: 5px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #000000;
+      z-index: 1;
+    }
 
-        #submit {
-            float: right;
-        }
-    </style>
+    #popup { padding: 10px; }
+
+    #name, #mosque_name, #year_established {
+      width: 100%;
+      height: 20px;
+      margin-bottom: 10px;
+    }
+
+    #content {
+      width: 100%;
+      height: 45px;
+      margin-bottom: 10px;
+    }
+
+    #submit { float: right; }
+  </style>
 </head>
 
 <body>
-    <!-- Map container -->
-    <div id="map"></div>
-    
-    <!-- Information box -->
-    <div id="info">
-        <h3>Islamic Mosques Timeline in Seattle</h3>
-        <h4>Farhan Hassan | University of Washington </h4>
-        <!-- Introduction to the Issue -->
-        <p>
-            This participatory map visualizes the historical growth and spatial distribution of mosques from the 1990s to 2026.
-            Users can explore how Islamic places of worship have expanded across Seattle over time, revealing patterns of migration, community formation, and religious infrastructure development.
-            Contributors are invited to add mosques they know about by placing a point on the map and submitting information such as name, year established, and additional context. 
-            By crowdsourcing local knowledge, this map highlights both well-known and lesser-documented mosques, helping create a community-driven historical record.
-            The goal of this project is to demonstrate how participatory GIS can document cultural landscapes and preserve spatial histories that may otherwise be overlooked in official datasets.
-            <a href="https://hgis.uw.edu/lgbtqspaces/" target="_blank"><b>Islamic Mosques Timeline Map</b></a>.
-            An instruction can be found 
-            <a href="https://www.github.com/farcoolius/Islamic_Mosques" target="_blank">here</a>.
-            <i>Last update: June 23, 2023</i>
-        </p> 
-    </div>
-    
-    <!-- JavaScript code for the interactive map and data submission -->
-    <script>
-        // Variable to hold the popup instance
-        let popup = null;
-        
-        // GeoJSON data object to store the contributed points
-        let geojson = {
-            'type': 'FeatureCollection',
-            'features': []
-        };
-        
-        // Create a new map instance
-        let map = new maplibregl.Map({
-            container: 'map', // container id
-            style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=mf1LXbJDeucSKBT1WUJC', // style URL
-            center: [-122.3321, 47.6062], // starting position [lng, lat]
-            // pitch: 45, // pitch in degrees
-            zoom: 12 // starting zoom
-        });
+  <div id="map"></div>
 
-        // Fetch existing records when the window is loaded
-        window.addEventListener("load", async function () {
-            let response = await fetch('https://islamic-mosques.herokuapp.com/api/get-record', {
-                method: 'GET'
-            });
+  <div id="info">
+    <h3>Islamic Mosques Timeline in Seattle</h3>
+    <h4>Farhan Hassan | University of Washington</h4>
+    <p>
+      This participatory map visualizes the historical growth and spatial distribution of mosques from the 1990s to 2026.
+      Users can explore how Islamic places of worship have expanded across Seattle over time, revealing patterns of migration,
+      community formation, and religious infrastructure development. Contributors are invited to add mosques they know about
+      by placing a point on the map and submitting information such as name, year established, and additional context.
+      By crowdsourcing local knowledge, this map highlights both well-known and lesser-documented mosques, helping create a
+      community-driven historical record. The goal of this project is to demonstrate how participatory GIS can document cultural
+      landscapes and preserve spatial histories that may otherwise be overlooked in official datasets.
+      <a href="https://www.github.com/farcoolius/Islamic_Mosques" target="_blank">Project repo</a>.
+      <i>Last update: Feb 2026</i>
+    </p>
+  </div>
 
-            let data = await response.json();
-      
-            // Iterate through the fetched records and add them to the GeoJSON data object
-            for (let i = 0; i < data.rows.length; i++) {
-                geojson.features.push({
-                    'type': 'Feature',
-                    'properties': {
-                        'contributor': data.rows[i].contributor,
-                        'mosque_name': data.rows[i].mosque_name,
-                        'year_established': data.rows[i].year_established,
-                        'content': data.rows[i].content,
-                    },
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [data.rows[i].lng, data.rows[i].lat]
-                    }
-                    // If the map source already exists, refresh it so points appear immediately
-                    if (map.getSource('places')) {
-                        map.getSource('places').setData(geojson);
-                    }
-                });
+  <script>
+    let popup = null;
+
+    let geojson = {
+      type: 'FeatureCollection',
+      features: []
+    };
+
+    let map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=mf1LXbJDeucSKBT1WUJC',
+      center: [-122.3321, 47.6062],
+      zoom: 12
+    });
+
+    // Load existing records
+    window.addEventListener("load", async function () {
+      try {
+        let response = await fetch('https://islamic-mosques.herokuapp.com/api/get-record', { method: 'GET' });
+        let data = await response.json();
+
+        for (let i = 0; i < data.rows.length; i++) {
+          geojson.features.push({
+            type: 'Feature',
+            properties: {
+              contributor: data.rows[i].contributor,
+              mosque_name: data.rows[i].mosque_name,
+              year_established: data.rows[i].year_established,
+              content: data.rows[i].content
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [data.rows[i].lng, data.rows[i].lat]
             }
-        });
-
-        // After the map loads, add the GeoJSON source and layer for existing points
-        map.on("load", function () {
-            map.addSource('places', {
-                'type': 'geojson',
-                'data': geojson
-            });
-
-            map.addLayer({
-                'id': 'placesLayer',
-                'type': 'circle',
-                'source': 'places',
-                'paint': {
-                    'circle-radius': 6,
-                    'circle-color': '#B42222'
-                }
-            });
-        });
-
-        // Show popup on mouse enter over an existing point
-        map.on('mouseenter', 'placesLayer', function (e) {
-            map.getCanvas().style.cursor = 'pointer';
-
-            var mosqueName = e.features[0].properties.mosque_name || "Unknown";
-            var yearEstablished = e.features[0].properties.year_established || "N/A";
-            var content = e.features[0].properties.content || "";
-            var contributor = e.features[0].properties.contributor || "Anonymous";
-
-            popup = new maplibregl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(`
-                    <p><b>${mosqueName}</b> (${yearEstablished})</p>
-                    <p>${content}</p>
-                    <p><i>Added by:</i> ${contributor}</p>
-                `)
-                .addTo(map);
-        });
-
-        // Remove popup on mouse leave from an existing point
-        map.on('mouseleave', 'placesLayer', function () {
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-        });
-
-        // Handle click event on the map to allow user contribution
-        map.on('click', function (e) {
-            if (popup) {
-                popup.remove();
-            }
-
-            // Create the HTML content for the contribution popup
-            const popupContent = `
-                <div id="popup">
-                    <input type="text" id="name" placeholder="Your name (optional)">
-                    <input type="text" id="mosque_name" placeholder="Mosque name (required)">
-                    <input type="number" id="year_established" placeholder="Year established (e.g., 1998)">
-                    <input type="text" id="content" placeholder="Notes / history (optional)">
-                    <button id="submit">Submit</button>
-                </div>
-            `;
-
-            // Create a new popup and set its content
-            popup = new maplibregl.Popup({ closeOnClick: false })
-                .setLngLat(e.lngLat)
-                .setHTML(popupContent)
-                .addTo(map);
-
-            // Attach an event listener to the submit button to handle new record submission
-            document.getElementById('submit').addEventListener('click', submitNewRecord);
-            e.preventDefault();
-        });
-
-        // Function to handle the submission of a new record
-        async function submitNewRecord() {
-            let contributor = document.getElementById('name').value;
-            let mosqueName = document.getElementById('mosque_name').value;
-            let yearEstablished = document.getElementById('year_established').value;
-            let content = document.getElementById('content').value;
-            let lngLat = popup.getLngLat();
-
-            // Create a new URLSearchParams object and append the data to it
-            let newRecord = new URLSearchParams();
-            newRecord.append('contributor', contributor);
-            newRecord.append('mosque_name', mosqueName);
-            newRecord.append('year_established', yearEstablished);
-            newRecord.append('content', content);
-            newRecord.append('lng', lngLat.lng);
-            newRecord.append('lat', lngLat.lat);
-
-            // Set the POST request settings
-            let settings = {
-                method: 'POST',
-                body: newRecord
-            }
-
-            try {
-                // Send the POST request to add the new record
-                await fetch('https://islamic-mosques.herokuapp.com/api/add-record', settings);
-            } catch (err) {
-                // Handle any errors that occur during the request
-                console.error(err);
-            } finally {
-                // Remove the popup and update the GeoJSON data with the new point
-                popup.remove();
-                geojson.features.push({
-                    'type': 'Feature',
-                    'properties': {
-                        'contributor': contributor,
-                        'mosque_name': mosqueName,
-                        'year_established': yearEstablished,
-                        'content': content
-                    },
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [lngLat.lng, lngLat.lat]
-                    }
-                });
-                map.getSource('places').setData(geojson);
-            }
+          });
         }
-    </script>
 
+        // IMPORTANT: update the source after data loads (if the source already exists)
+        if (map.getSource('places')) {
+          map.getSource('places').setData(geojson);
+        }
+      } catch (err) {
+        console.error("Error loading records:", err);
+      }
+    });
+
+    map.on("load", function () {
+      map.addSource('places', {
+        type: 'geojson',
+        data: geojson
+      });
+
+      map.addLayer({
+        id: 'placesLayer',
+        type: 'circle',
+        source: 'places',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#B42222',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff'
+        }
+      });
+    });
+
+    // Hover popup
+    map.on('mouseenter', 'placesLayer', function (e) {
+      map.getCanvas().style.cursor = 'pointer';
+
+      var coordinates = e.features[0].geometry.coordinates.slice(); // <-- FIXED
+      var mosqueName = e.features[0].properties.mosque_name || "Unknown";
+      var yearEstablished = e.features[0].properties.year_established || "N/A";
+      var content = e.features[0].properties.content || "";
+      var contributor = e.features[0].properties.contributor || "Anonymous";
+
+      popup = new maplibregl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(`
+          <p><b>${mosqueName}</b> (${yearEstablished})</p>
+          <p>${content}</p>
+          <p><i>Added by:</i> ${contributor}</p>
+        `)
+        .addTo(map);
+    });
+
+    map.on('mouseleave', 'placesLayer', function () {
+      map.getCanvas().style.cursor = '';
+      if (popup) popup.remove();
+    });
+
+    // Click to add
+    map.on('click', function (e) {
+      if (popup) popup.remove();
+
+      const popupContent = `
+        <div id="popup">
+          <input type="text" id="name" placeholder="Your name (optional)">
+          <input type="text" id="mosque_name" placeholder="Mosque name (required)">
+          <input type="number" id="year_established" placeholder="Year established (e.g., 1998)">
+          <input type="text" id="content" placeholder="Notes / history (optional)">
+          <button id="submit">Submit</button>
+        </div>
+      `;
+
+      popup = new maplibregl.Popup({ closeOnClick: false })
+        .setLngLat(e.lngLat)
+        .setHTML(popupContent)
+        .addTo(map);
+
+      document.getElementById('submit').addEventListener('click', submitNewRecord);
+      e.preventDefault();
+    });
+
+    async function submitNewRecord() {
+      let contributor = document.getElementById('name').value;
+      let mosqueName = document.getElementById('mosque_name').value;
+      let yearEstablished = document.getElementById('year_established').value;
+      let content = document.getElementById('content').value;
+      let lngLat = popup.getLngLat();
+
+      if (!mosqueName || mosqueName.trim().length === 0) {
+        alert("Please enter a mosque name.");
+        return;
+      }
+
+      let newRecord = new URLSearchParams();
+      newRecord.append('contributor', contributor);
+      newRecord.append('mosque_name', mosqueName);
+      newRecord.append('year_established', yearEstablished);
+      newRecord.append('content', content);
+      newRecord.append('lng', lngLat.lng);
+      newRecord.append('lat', lngLat.lat);
+
+      let settings = { method: 'POST', body: newRecord };
+
+      try {
+        await fetch('https://islamic-mosques.herokuapp.com/api/add-record', settings);
+      } catch (err) {
+        console.error("Error submitting record:", err);
+      } finally {
+        if (popup) popup.remove();
+
+        geojson.features.push({
+          type: 'Feature',
+          properties: {
+            contributor: contributor,
+            mosque_name: mosqueName,
+            year_established: yearEstablished,
+            content: content
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: [lngLat.lng, lngLat.lat]
+          }
+        });
+
+        if (map.getSource('places')) {
+          map.getSource('places').setData(geojson);
+        }
+      }
+    }
+  </script>
 </body>
-
+</html>
 </html>
